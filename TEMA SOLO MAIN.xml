@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<html xmlns='http://www.w3.org/1999/xhtml' xmlns:b='http://www.google.com/2005/gml/b' xmlns:data='http://www.google.com/2005/gml/data' xmlns:expr='http://www.google.com/2005/gml/expr'>
+  <head>
+    <b:include data='blog' name='all-head-content'/>
+    <title><data:blog.pageTitle/></title>
+    <b:skin><![CDATA[
+         
+    ]]></b:skin>
+  </head>
+
+  <body>
+    <b:section id='main' showaddelement='yes'>
+      <b:widget id='HTML1' locked='false' title='' type='HTML'>
+        <b:widget-settings>
+          <b:widget-setting name='content'><![CDATA[<!doctype html>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        #canvas {
+            border: 2px solid #000000;
+            background-color: #ffffff;
+            cursor: crosshair;
+        }
+
+        #tools {
+            margin-top: 20px;
+        }
+
+        .tool-button {
+            background-color: #ffffff;
+            border: 1px solid #000000;
+            color: #000000;
+            padding: 8px 12px;
+            margin-right: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .tool-button:hover {
+            background-color: #eeeeee;
+        }
+    </style>
+
+
+    <h1>Paint Online</h1>
+    <canvas id="canvas" width="800" height="600"></canvas>
+
+    <div id="tools">
+        <label for="colorPicker">Color:</label>
+        <input type="color" id="colorPicker" value="#000000" />
+        <button class="tool-button" id="pencilTool">Lápiz</button>
+        <button class="tool-button" id="brushTool">Pincel</button>
+        <button class="tool-button" id="eraserTool">Borrador</button>
+        <button class="tool-button" id="clearCanvas">Limpiar</button>
+        <button class="tool-button" id="exportCanvas">Exportar</button>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const canvas = document.getElementById("canvas");
+            const context = canvas.getContext("2d");
+            let isDrawing = false;
+            let currentColor = "#000000"; // Color inicial
+            let currentTool = "pencil"; // Herramienta de dibujo inicial
+
+            // Función para dibujar en el lienzo
+            function draw(event) {
+                if (!isDrawing) return;
+                const x = event.clientX - canvas.offsetLeft;
+                const y = event.clientY - canvas.offsetTop;
+                context.lineCap = "round";
+
+                if (currentTool === "pencil") {
+                    context.lineWidth = 1; // Grosor del lápiz
+                    context.strokeStyle = currentColor;
+                    context.lineTo(x, y);
+                    context.stroke();
+                    context.beginPath();
+                    context.moveTo(x, y);
+                } else if (currentTool === "brush") {
+                    context.lineWidth = 10; // Grosor del pincel
+                    context.strokeStyle = currentColor;
+                    context.lineTo(x, y);
+                    context.stroke();
+                    context.beginPath();
+                    context.moveTo(x, y);
+                } else if (currentTool === "eraser") {
+                    context.clearRect(x - 10, y - 10, 20, 20); // Tamaño del borrador
+                }
+            }
+
+            // Evento para empezar a dibujar
+            canvas.addEventListener("mousedown", function(event) {
+                isDrawing = true;
+                draw(event);
+            });
+
+            // Evento para dejar de dibujar
+            canvas.addEventListener("mouseup", function() {
+                isDrawing = false;
+                context.beginPath();
+            });
+
+            // Evento para dibujar mientras se mueve el mouse
+            canvas.addEventListener("mousemove", draw);
+
+            // Evento para cambiar de color
+            document.getElementById("colorPicker").addEventListener("change", function() {
+                currentColor = this.value;
+            });
+
+            // Eventos para seleccionar herramienta de dibujo
+            document.getElementById("pencilTool").addEventListener("click", function() {
+                currentTool = "pencil";
+            });
+
+            document.getElementById("brushTool").addEventListener("click", function() {
+                currentTool = "brush";
+            });
+
+            document.getElementById("eraserTool").addEventListener("click", function() {
+                currentTool = "eraser";
+            });
+
+            document.getElementById("clearCanvas").addEventListener("click", function() {
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                context.fillStyle = "#ffffff";
+                context.fillRect(0, 0, canvas.width, canvas.height); // Rellenar con blanco
+            });
+
+            // Evento para exportar el dibujo
+            document.getElementById("exportCanvas").addEventListener("click", function() {
+                // Crear un fondo blanco
+                const exportCanvas = document.createElement("canvas");
+                const exportContext = exportCanvas.getContext("2d");
+                exportCanvas.width = canvas.width;
+                exportCanvas.height = canvas.height;
+
+                // Rellenar el fondo con blanco
+                exportContext.fillStyle = "#ffffff";
+                exportContext.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+
+                // Dibujar el contenido del canvas original en el nuevo canvas
+                exportContext.drawImage(canvas, 0, 0);
+
+                const dataURL = exportCanvas.toDataURL("image/jpeg");
+                const link = document.createElement("a");
+                link.href = dataURL;
+                link.download = "my_drawing.jpg";
+                link.click();
+            });
+
+            // Inicializar el fondo blanco del canvas
+            context.fillStyle = "#ffffff";
+            context.fillRect(0, 0, canvas.width, canvas.height);
+        });
+    </script>
+
+</!doctype>]]></b:widget-setting>
+        </b:widget-settings>
+        <b:includable id='main'>
+  <!-- only display title if it's non-empty -->
+  <b:if cond='data:title != &quot;&quot;'>
+    <h2 class='title'><data:title/></h2>
+  </b:if>
+  <div class='widget-content'>
+    <data:content/>
+  </div>
+
+  <b:include name='quickedit'/>
+</b:includable>
+      </b:widget>
+    </b:section> 
+  </body>
+</html>
